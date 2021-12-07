@@ -10,31 +10,40 @@ var ErrNotAllVertExist = fmt.Errorf("not all vertices exist")
 
 //Vertex of graph
 type Vertex struct {
-	Key      int
-	Vertices map[int]*Vertex
+	Key      string
+	Vertices map[string]*Vertex
 	Parent   *Vertex
 	Distance int
 	InQueue  bool
 }
 
+//Vertex of graph
+type Edge struct {
+	Key    string
+	From   *Vertex
+	To     *Vertex
+	Weight int
+}
+
 // NewVertex is a constructor function for the Vertex
-func NewVertex(key int) *Vertex {
+func NewVertex(key string) *Vertex {
 	return &Vertex{
 		Key:      key,
-		Vertices: map[int]*Vertex{},
+		Vertices: map[string]*Vertex{},
 	}
 }
 
 // Graph is graph struct
 type Graph struct {
-	Vertices map[int]*Vertex
+	Vertices map[string]*Vertex
+	Edges    map[string]*Edge
 	directed bool
 }
 
 // NewDirectedGraph create directed graph
 func NewDirectedGraph() *Graph {
 	return &Graph{
-		Vertices: map[int]*Vertex{},
+		Vertices: map[string]*Vertex{},
 		directed: true,
 	}
 }
@@ -42,13 +51,13 @@ func NewDirectedGraph() *Graph {
 // NewUndirectedGraph create undirected graph
 func NewUndirectedGraph() *Graph {
 	return &Graph{
-		Vertices: map[int]*Vertex{},
+		Vertices: map[string]*Vertex{},
 	}
 }
 
 // AddVertex creates a new vertex with the given
 // key and adds it to the graph
-func (g *Graph) AddVertex(key int) error {
+func (g *Graph) AddVertex(key string) error {
 
 	if g.Vertices[key] != nil {
 		return ErrVertExist
@@ -60,7 +69,7 @@ func (g *Graph) AddVertex(key int) error {
 }
 
 // AddEdge adds an edge between two vertices in the graph
-func (g *Graph) AddEdge(k1, k2 int) error {
+func (g *Graph) AddEdge(k1, k2 string, w int) error {
 	v1 := g.Vertices[k1]
 	v2 := g.Vertices[k2]
 
@@ -73,8 +82,11 @@ func (g *Graph) AddEdge(k1, k2 int) error {
 	}
 
 	v1.Vertices[v2.Key] = v2
-	if !g.directed && v1.Key != v2.Key {
-		v2.Vertices[v1.Key] = v1
+	g.Edges[k1+k2] = &Edge{
+		Key:    k1 + k2,
+		From:   v1,
+		To:     v2,
+		Weight: w,
 	}
 
 	return nil
@@ -141,14 +153,14 @@ func (q *queue) dequeue() *Vertex {
 // BFS function ==========================================================================
 
 //BFS - breadth-first search
-func BFS(g *Graph, start *Vertex) map[int]*Vertex { //
+func BFS(g *Graph, start *Vertex) map[string]*Vertex { //
 
 	for _, v := range g.Vertices {
 		v.Parent, v.Distance, v.InQueue = nil, 0, false
 	}
 
 	q := &queue{}
-	visited := map[int]*Vertex{}
+	visited := map[string]*Vertex{}
 	current := start
 
 	for {
@@ -179,7 +191,7 @@ func BFS(g *Graph, start *Vertex) map[int]*Vertex { //
 var ErrNoWay = fmt.Errorf("there is no way between vertices")
 
 // // ShortestBFS search with ReQueue
-// func ShortestBFS(k1, k2 int, g *Graph) *queue {
+// func ShortestBFS(k1, k2 string, g *Graph) *queue {
 // 	searchTree := BFS(g, g.Vertices[k1])
 // if _, ok := searchTree[k2]; !ok {
 // 	return nil, ErrNoWay
@@ -193,7 +205,7 @@ var ErrNoWay = fmt.Errorf("there is no way between vertices")
 // }
 
 // // ReQueue recursively fill the queue
-// func ReQueue(k int, searchTree map[int]*Vertex, callBack func(v *Vertex)) {
+// func ReQueue(k string, searchTree map[string]*Vertex, callBack func(v *Vertex)) {
 // 	v := searchTree[k]
 // 	callBack(v)
 // 	if v.Parent != nil {
@@ -202,15 +214,15 @@ var ErrNoWay = fmt.Errorf("there is no way between vertices")
 // }
 
 // ShortestBFS search with anonimus recursion
-func ShortestBFS(k1, k2 int, g *Graph) (*queue, error) {
+func ShortestBFS(k1, k2 string, g *Graph) (*queue, error) {
 	searchTree := BFS(g, g.Vertices[k1])
 	if _, ok := searchTree[k2]; !ok {
 		return nil, ErrNoWay
 	}
 	q := &queue{}
-	var f func(int)
+	var f func(string)
 
-	f = func(k int) {
+	f = func(k string) {
 		v := searchTree[k]
 		q.enqueueHead(v)
 		if v.Parent != nil {
