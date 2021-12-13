@@ -36,7 +36,7 @@ func NewVertex(key string) *Vertex {
 // Graph is graph struct
 type Graph struct {
 	Vertices map[string]*Vertex
-	Edges    map[string]*Edge
+	Edges    map[*Vertex]map[*Vertex]int
 	directed bool
 }
 
@@ -82,12 +82,7 @@ func (g *Graph) AddEdge(k1, k2 string, w int) error {
 	}
 
 	v1.Vertices[v2.Key] = v2
-	g.Edges[k1+k2] = &Edge{
-		Key:    k1 + k2,
-		From:   v1,
-		To:     v2,
-		Weight: w,
-	}
+	g.Edges[v1][v2] = w
 
 	return nil
 }
