@@ -17,14 +17,6 @@ type Vertex struct {
 	InQueue  bool
 }
 
-//Vertex of graph
-type Edge struct {
-	Key    string
-	From   *Vertex
-	To     *Vertex
-	Weight int
-}
-
 // NewVertex is a constructor function for the Vertex
 func NewVertex(key string) *Vertex {
 	return &Vertex{
@@ -68,7 +60,7 @@ func (g *Graph) AddVertex(key string) error {
 	return nil
 }
 
-// AddEdge adds an edge between two vertices in the graph
+// AddEdge adds an edge between two vertices in the graph wiht weight w
 func (g *Graph) AddEdge(k1, k2 string, w int) error {
 	v1 := g.Vertices[k1]
 	v2 := g.Vertices[k2]
