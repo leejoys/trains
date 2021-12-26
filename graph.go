@@ -60,7 +60,7 @@ func (g *Graph) AddVertex(key string) error {
 	return nil
 }
 
-// AddEdge adds an edge between two vertices in the graph wiht weight w
+// AddEdge adds an edge between two vertices in the graph with weight w
 func (g *Graph) AddEdge(k1, k2 string, w int) error {
 	v1 := g.Vertices[k1]
 	v2 := g.Vertices[k2]
